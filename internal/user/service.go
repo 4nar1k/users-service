@@ -1,6 +1,8 @@
 package user
 
 import (
+	"context"
+	"fmt"
 	"github.com/4nar1k/project-protos/proto/user"
 )
 
@@ -22,13 +24,15 @@ func (s *UserService) CreateUser(req *user.CreateUserRequest) (*user.CreateUserR
 		User: &user.User{Id: created.ID, Email: created.Email},
 	}, nil
 }
-
-func (s *UserService) GetUser(req *user.User) (*user.User, error) {
-	u, err := s.repo.GetUserByID(req.Id)
+func (s *UserService) GetUserByID(ctx context.Context, id uint32) (*User, error) {
+	if id == 0 {
+		return nil, fmt.Errorf("user_id is required")
+	}
+	u, err := s.repo.GetUserByID(id)
 	if err != nil {
 		return nil, err
 	}
-	return &user.User{Id: u.ID, Email: u.Email}, nil
+	return &User{ID: u.ID, Email: u.Email}, nil
 }
 
 func (s *UserService) UpdateUser(req *user.UpdateUserRequest) (*user.UpdateUserResponse, error) {
@@ -59,5 +63,5 @@ func (s *UserService) ListUsers(req *user.ListUsersRequest) (*user.ListUsersResp
 	for i, u := range users {
 		protoUsers[i] = &user.User{Id: u.ID, Email: u.Email}
 	}
-	return &user.ListUsersResponse{Items: protoUsers}, nil
+	return &user.ListUsersResponse{Users: protoUsers}, nil
 }
